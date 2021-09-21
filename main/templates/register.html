@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block body %}
+
+
+   {% if message %}
+        <div>{{ message }}</div>
+    {% endif %}
+      <section id="hero-no-slider" class="d-flex justify-cntent-center align-items-center">
+        <div class="container position-relative" data-aos="fade-up" data-aos-delay="100">
+          <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <form id"register_form" action="{% url 'register' %}" method="post">
+                    {% csrf_token %}
+                  <div class="row">
+                    <div class="form-group mt-3">
+                      <input type="text" name="username" class="form-control" id="username" placeholder="Username" required>
+                    </div>
+                    <div class="form-group mt-3">
+                      <input type="email" class="form-control" name="email" id="email" placeholder="Your Email" required>
+                    </div>
+                  </div>
+                  <div class="form-group mt-3">
+                    <input type="password" class="form-control" name="password" id="passowrd" placeholder="Password" required>
+                  </div>
+                  <div class="form-group mt-3">
+                    <input type="password" class="form-control" name="confirmation" id="confirmation" placeholder="Confirm Password" required>
+                  <br>
+                  </div>
+                     <input type="submit" class="btn-get-started-form" value="Register">
+                     
+                </form>
+              </div>
+          </div>
+          <br>
+          <p class="animate__animated animate__fadeInUp"> Already have an account? <a href="{% url 'login' %}">Log In here.</a></p>
+      
+        </div>
+         </section>
+    
+
+
+  <!-- Template Main JS File -->
+  <script src="{% static 'js/main.js"></script>
+
+{% endblock %}
