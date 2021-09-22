@@ -11,5 +11,9 @@ urlpatterns = [
     path("about_us", views.about_us_view, name="about_us"),
     path("contact_us", views.contact_us_view, name="contact_us"),
     path("profile", views.profile_view, name="profile"),
-    path("settings", views.settings_view, name="settings")
+    path("settings", views.settings_view, name="settings"),
+    
+    
+    ## API Path
+    path("search_book", views.comparer_view, name="searcH_book"),
 ]

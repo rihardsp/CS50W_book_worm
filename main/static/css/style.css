@@ -359,30 +359,7 @@ h1, h2, h3, h4, h5, h6, .font-primary {
   animation-delay: 0.8s;
   border: 2px solid #68A4C4;
 }
-#hero .btn-get-started-form:hover {
-  background: #68A4C4;
-  color: #fff;
-  text-decoration: none;
-}
-
-.btn-get-started-form {
-  font-family: "Roboto", sans-serif;
-  font-weight: 500;
-  font-size: 14px;
-  letter-spacing: 1px;
-  display: inline-block;
-  padding: 12px 32px;
-  border-radius: 50px;
-  transition: 0.5s;
-  line-height: 1;
-  margin: 10px;
-  color: gray;
-  -webkit-animation-delay: 0.8s;
-  animation-delay: 0.8s;
-  border: 2px solid #68A4C4;
-}
-
-.btn-get-started:hover {
+#hero .btn-get-started:hover {
   background: #68A4C4;
   color: #fff;
   text-decoration: none;
@@ -449,7 +426,7 @@ h1, h2, h3, h4, h5, h6, .font-primary {
   top: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(to right, rgba(30, 67, 86, 0.8), rgba(30, 67, 86, 0.6)), url("../img/Hero_books-1396254731.jpg") center top no-repeat;
+  background: linear-gradient(to right, rgba(30, 67, 86, 0.8), rgba(30, 67, 86, 0.6)), url("../img/hero-bg.jpg") center top no-repeat;
 }
 #hero-no-slider h2 {
   color: #fff;

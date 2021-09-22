@@ -21,38 +21,41 @@ from .models import User
 def index(request):
     
     """ Main index function loaded every time user opens website"""
-    return render(request, "index.html")
+    return render(request, "index.html",{"page_name":"Forum"})
     
 def library_view(request):
     
     """ Main index function loaded every time user opens website"""
-    return render(request, "library.html")
+    return render(request, "library.html",{"page_name":"Library"})
 
 def comparer_view(request):
-    
+    if request.method == 'POST':
+        print("form")
+        
     """ Main index function loaded every time user opens website"""
-    return render(request, "comparer.html")
-    
+    return render(request, "comparer.html",{"page_name":"Comparer"})
+
+
 def about_us_view(request):
     
     """ Main index function loaded every time user opens website"""
-    return render(request, "about_us.html")
+    return render(request, "about_us.html",{"page_name":"About Us"})
     
 def contact_us_view(request):
     
     """ Main index function loaded every time user opens website"""
-    return render(request, "contact_us.html")
+    return render(request, "contact_us.html",{"page_name":"Contact Us"})
     
 def profile_view(request):
     
     """ Main index function loaded every time user opens website"""
-    return render(request, "profile.html")
+    return render(request, "profile.html",{"page_name":"Your Profile"})
     
     
 def settings_view(request):
     
     """ Main index function loaded every time user opens website"""
-    return render(request, "settings.html")
+    return render(request, "settings.html",{"page_name":"Settings"})
 
 
 ### API INTERACTIONS 

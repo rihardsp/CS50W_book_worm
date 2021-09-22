@@ -2,5 +2,44 @@
 {% load static %}
 
 {% block body %}
-TO DO
+<!DOCTYPE html>
+
+<body>
+
+  <section id="comparer-search" class="blog">  
+    <div class="col-lg-7" style=" margin-left: auto;margin-right: auto;">
+        <div class="sidebar">
+          <h3 class="sidebar-title">Search</h3>
+          <div class="sidebar-item search-form">
+            <form id="search_form" action="#">
+              <input autocomplete="on" id="search-text" list="search-suggestions" type="text">
+              <button type="submit"><i class="bi bi-search"></i></button>
+            </form>
+          </div>
+        </div>
+    </div>
+  </section>    
+  <br>
+  <datalist id="search-suggestions"></datalist>
+  <section id="comparer-results" class="blog">  
+  
+  <div id="searchresults">
+    
+  </div>
+  
+  {% block results %}
+  {% endblock %}
+  
+  </section> 
+  
+  
+  
+</body>
+
+</html>
+{% endblock %}
+
+{% block script %}
+
+  <script src="{% static 'js/comparer.js' %}"></script>
 {% endblock %}
