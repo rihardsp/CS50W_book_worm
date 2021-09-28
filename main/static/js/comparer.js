@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
-    
-   document.getElementById('search-text').addEventListener('input', () => monitor_search());
-   document.getElementById('search_form').addEventListener('submit', () => submit_search());
+
+   // TO DO -  Decrease requests - document.getElementById('search-text').addEventListener('input', () => monitor_search());
+  //document.getElementById('search_form').addEventListener('submit', () => submit_search());
 })
 
 
@@ -63,18 +63,20 @@ function monitor_search()
 
 function submit_search()
 {   
-    console.log("Form Submitted")
     event.preventDefault()
     
     fetch('/search_book', {
         method: 'POST',
         body: JSON.stringify({
         "search_text": "search_text"
-        })
-    }).then(response => response.json())
+        })})
+    
+}
+
+`
+}).then(response => response.json())
     .then(data => {
         
     });
-}
-
-
+    
+    `

@@ -13,7 +13,7 @@ urlpatterns = [
     path("profile", views.profile_view, name="profile"),
     path("settings", views.settings_view, name="settings"),
     
-    
-    ## API Path
-    path("search_book", views.comparer_view, name="searcH_book"),
+    path("book/<str:book_key>", views.book_view, name="settings"),
+
+    path("search_book", views.comparer_view, name="search_book"),
 ]

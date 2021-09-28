@@ -2,41 +2,91 @@
 {% load static %}
 
 {% block body %}
-<!DOCTYPE html>
-
-<body>
-
   <section id="comparer-search" class="blog">  
     <div class="col-lg-7" style=" margin-left: auto;margin-right: auto;">
         <div class="sidebar">
           <h3 class="sidebar-title">Search</h3>
           <div class="sidebar-item search-form">
-            <form id="search_form" action="#">
-              <input autocomplete="on" id="search-text" list="search-suggestions" type="text">
+            <form id="search_form" action="{% url 'search_book' %}" method="post">
+               {% csrf_token %}
+              <input autocomplete="on" id="search-text" name="search-text"  list="search-suggestions" type="text">
               <button type="submit"><i class="bi bi-search"></i></button>
             </form>
           </div>
         </div>
     </div>
   </section>    
-  <br>
   <datalist id="search-suggestions"></datalist>
   <section id="comparer-results" class="blog">  
   
   <div id="searchresults">
+    {% if search_results %}
+    {% for result in search_pages %}
+                <div id="main_card-{{ post.id }}" class="card" style="width:95%; left:3%">
+                    <div id="text_card-{{ post.id }}" class="card-body">
+                        <img src="http://covers.openlibrary.org/b/{{ result.book_cover }}-S.jpg"><h5 class="card-title"><a style="color:black;" href="book/{{ result.book_key }}">{{ result.title }}</a></h5>
+                        <p id="text_field-{{ post.id }}" class="card-text">{{ result.author_name }}</p>
+                        <p class="card-text"><small class="text-muted">{{ result.publish_date }} </small></p>
+                    </div>
+                </div>
+                <br>
+            {% endfor %}
+            <br>
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1">&laquo; first</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">previous</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    
+                     {% if page_obj.number|add:'-4' > 1 %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.number|add:'-5' }}">&hellip;</a></li>
+                    {% endif %}
+                    
+                    {% for i in page_obj.paginator.page_range %}
+                        {% if page_obj.number == i %}
+                            <li class="page-item active" aria-current="page">
+                                <span class="page-link">{{ i }}<span class="sr-only">(current)</span></span>
+                            </li>
+                        {% elif i > page_obj.number|add:'-5' and i < page_obj.number|add:'5' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.paginator.num_pages > page_obj.number|add:'4' %}
+                       <li class="page-item"><a class="page-link" href="?page={{ page_obj.number|add:'5' }}">&hellip;</a></li>
+                    {% endif %}
+                    
+                    
+                    
+                    {% if page_obj.has_next %}
+                            <li  class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Next</a>
+                            </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            <br>
+    {% endif %}
     
+    {% if search_failed %}
+    <div> Search returned no results, pelease try again!</div>
+    {% endif %}
   </div>
-  
-  {% block results %}
-  {% endblock %}
-  
-  </section> 
-  
-  
-  
-</body>
 
-</html>
 {% endblock %}
 
 {% block script %}
