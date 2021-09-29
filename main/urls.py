@@ -13,7 +13,7 @@ urlpatterns = [
     path("profile", views.profile_view, name="profile"),
     path("settings", views.settings_view, name="settings"),
     
-    path("book/<str:book_key>", views.book_view, name="settings"),
+  
+    path("book/<str:book_key>/<str:book_id>", views.book_view, name="settings"),
 
-    path("search_book", views.comparer_view, name="search_book"),
 ]

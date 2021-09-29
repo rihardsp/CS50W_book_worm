@@ -1,7 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
 
-   // TO DO -  Decrease requests - document.getElementById('search-text').addEventListener('input', () => monitor_search());
+  document.getElementById('search-text').addEventListener('input', () => monitor_search());
   //document.getElementById('search_form').addEventListener('submit', () => submit_search());
+
 })
 
 
@@ -14,27 +15,27 @@ function monitor_search()
     console.time("timespan")
     
     console.log(searchtext)
-    if(searchtext.length > 2)
+    if(searchtext.length % 2 == 0)
     {   
         
-        let api_url = `https://openlibrary.org/search.json?q=`+searchtext
+        let api_url = `https://www.googleapis.com/books/v1/volumes?q=`+searchtext
         // fetch open library books
         fetch(api_url)
             .then(res => res.json())
             .then(result => {
-                console.log("Results returned: " +result["numFound"])
-                let docs = result["docs"]
+                let items = result["items"]
 
                 let htmltext = ""
                 let results_list = []
                 
-                for (let i = 0; i < docs.length; i++)
+                for (let i = 0; i < items.length; i++)
                 {   
                     try
                     {
-                    let title = docs[i]["title"]
-                    let author = docs[i]["author_name"]
-                    htmltext = htmltext+`<option value="${title} by ${author}">`
+                    let volumeInfo = items[i]['volumeInfo']
+                    let title = volumeInfo["title"]
+                    let authors = volumeInfo["authors"]
+                    htmltext = htmltext+`<option value="${title} by ${authors}">`
                     results_list.push(htmltext)
                     }
                     catch(e)

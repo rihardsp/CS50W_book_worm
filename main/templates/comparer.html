@@ -7,9 +7,8 @@
         <div class="sidebar">
           <h3 class="sidebar-title">Search</h3>
           <div class="sidebar-item search-form">
-            <form id="search_form" action="{% url 'search_book' %}" method="post">
-               {% csrf_token %}
-              <input autocomplete="on" id="search-text" name="search-text"  list="search-suggestions" type="text">
+            <form id="search_form" action="comparer" method="GET">
+              <input autocomplete="on" id="search-text" name="search-text" placeholder="Search For a book..." list="search-suggestions" type="text">
               <button type="submit"><i class="bi bi-search"></i></button>
             </form>
           </div>
@@ -20,26 +19,49 @@
   <section id="comparer-results" class="blog">  
   
   <div id="searchresults">
+    {% if search_failed %}
+        <div class="row aos-init aos-animate" data-aos="fade-up">
+          <div class="col-md-3">
+          </div>
+          <div class="col-md-7 pt-5">
+            <h3>Search Failed!</h3>
+            <p>Please try again. It seems that there were no books maching your search....</p>
+            <ul>
+              <li><i class="bi bi-check"></i> Make sure you typed it correctly. </li>
+              <li><i class="bi bi-check"></i> Try to google it whether it exists at all. </li>
+              <li><i class="bi bi-check"></i> Contact us if it is still not working. </li>
+            </ul>
+          </div>
+        </div>
+    {% endif %}
     {% if search_results %}
     {% for result in search_pages %}
+            
                 <div id="main_card-{{ post.id }}" class="card" style="width:95%; left:3%">
                     <div id="text_card-{{ post.id }}" class="card-body">
-                        <img src="http://covers.openlibrary.org/b/{{ result.book_cover }}-S.jpg"><h5 class="card-title"><a style="color:black;" href="book/{{ result.book_key }}">{{ result.title }}</a></h5>
-                        <p id="text_field-{{ post.id }}" class="card-text">{{ result.author_name }}</p>
-                        <p class="card-text"><small class="text-muted">{{ result.publish_date }} </small></p>
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <a  href="book/{{ result.book_key }}/{{ result.book_id }}"><img src="{{ result.book_cover }}"></a>
+                                 </div>
+                            <div class="col-lg-4">
+                                <h5 class="card-title"><a style="color:black;" href="book/{{ result.book_key }}/{{ result.book_id }}">{{ result.title }}</a></h5>
+                                <p id="text_field-{{ post.id }}" class="card-text">{{ result.author_name }}</p>
+                                <p class="card-text"><small class="text-muted">{{ result.publish_date }} </small></p>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <br>
-            {% endfor %}
+    {% endfor %}
             <br>
             <nav aria-label="Page navigation example">
                 <ul class="pagination justify-content-center">
-                    {% if page_obj.has_previous %}
+                    {% if search_pages.has_previous %}
                         <li class="page-item">
-                            <a class="page-link" href="?page=1">&laquo; first</a>
+                            <a class="page-link" href="comparer?search-text={{ searchtext }}&page=1">&laquo; first</a>
                         </li>
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">previous</a>
+                            <a class="page-link" href="comparer?search-text={{ searchtext }}&page={{ search_pages.previous_page_number }}">previous</a>
                         </li>
                         {% else %}
                         <li class="page-item disabled">
@@ -48,30 +70,30 @@
                     {% endif %}
                     
                     
-                     {% if page_obj.number|add:'-4' > 1 %}
-                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.number|add:'-5' }}">&hellip;</a></li>
+                     {% if search_pages.number|add:'-4' > 1 %}
+                        <li class="page-item"><a class="page-link" href="comparer?search-text={{ searchtext }}&page={{ search_pages.number|add:'-5' }}">&hellip;</a></li>
                     {% endif %}
                     
-                    {% for i in page_obj.paginator.page_range %}
-                        {% if page_obj.number == i %}
+                    {% for i in search_pages.paginator.page_range %}
+                        {% if search_pages.number == i %}
                             <li class="page-item active" aria-current="page">
-                                <span class="page-link">{{ i }}<span class="sr-only">(current)</span></span>
+                                <span class="page-link">{{ i }}<span style="display:none">(current)</span></span>
                             </li>
-                        {% elif i > page_obj.number|add:'-5' and i < page_obj.number|add:'5' %}
+                        {% elif i > search_pages.number|add:'-5' and i < search_pages.number|add:'5' %}
                             <li class="page-item">
-                                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                                <a class="page-link" href="comparer?search-text={{ searchtext }}&page={{ i }}">{{ i }}</a>
                             </li>
                         {% endif %}
                     {% endfor %}
                     
-                    {% if page_obj.paginator.num_pages > page_obj.number|add:'4' %}
-                       <li class="page-item"><a class="page-link" href="?page={{ page_obj.number|add:'5' }}">&hellip;</a></li>
+                    {% if search_pages.paginator.num_pages > search_pages.number|add:'4' %}
+                       <li class="page-item"><a class="page-link" href="comparer?search-text={{ searchtext }}&page={{ search_pages.number|add:'5' }}">&hellip;</a></li>
                     {% endif %}
                     
                     
                     
-                    {% if page_obj.has_next %}
-                            <li  class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+                    {% if search_pages.has_next %}
+                            <li  class="page-item"><a class="page-link" href="comparer?search-text={{ searchtext }}&page={{ search_pages.next_page_number }}">&raquo;</a></li>
                         {% else %}
                             <li class="page-item disabled">
                                 <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Next</a>
@@ -82,9 +104,6 @@
             <br>
     {% endif %}
     
-    {% if search_failed %}
-    <div> Search returned no results, pelease try again!</div>
-    {% endif %}
   </div>
 
 {% endblock %}

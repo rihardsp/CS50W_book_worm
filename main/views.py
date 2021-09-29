@@ -12,17 +12,16 @@ from django.utils.timezone import get_current_timezone
 import pytz
 from django.core.paginator import Paginator
 import requests
-from django import forms
 
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from .models import User
+from decouple import config
 
 MAXPAGERESULTS = 10
+API_GOOGLE = config('Google_Key')
 
 ### VIEWS OF THE APPLICATIONS
-
-
 
 def index(request):
     
@@ -35,120 +34,151 @@ def library_view(request):
     
     """ Main index function loaded every time user opens website"""
     return render(request, "library.html",{"page_name":"Library"})
+
+def search_book(requests,searchpattern):
+    print("searchBook pressed" + searchpattern)
     
 @csrf_exempt
 @login_required
 def comparer_view(request):
     """ Comparer view loads searchbar or search_results"""
-
-    if request.method == "POST":
-        
+    search_pages = []
+    search_results = False
+    search_failed = False
+    print("Comparer View Loading")
+    
+    searchtext = request.GET.get('search-text','')
+    print("searchtext: " + searchtext)
+    
+    if(searchtext != ""):
+        page = int(request.GET.get('page') or 1)
         print("SEARCH FORM RECEIVED")
-        searchtext = request.POST["search-text"]
+        print("PAGE RECEVEID: " + str(page))
         print("USER SEARCHED FOR: " + searchtext)
-        try:
-            API_except_status = False
-            search_response = requests.get("https://openlibrary.org/search.json?&q="+searchtext)
+        try: 
+            startIndex = (page * 10) - 10
+            search_response = requests.get("https://www.googleapis.com/books/v1/volumes?q="+searchtext+"&startIndex="+ str(startIndex) + "&maxResults="+str(MAXPAGERESULTS))
+            print("Comparer_view API request returned: " + str(search_response))
             search_results = search_response.json()
+            print("Comparer_view API items found: "+ str(search_results['totalItems']))
+            if(search_results['totalItems'] == 0):
+                raise Exception("Total Items Returned are 0")
         except Exception as e:
             print("Comparer_view API request failed: " + str(e))
-            API_except_status = True
+            search_failed = True
+            
         
-        if(API_except_status == False):
-            print("Comparer_view API results returned: "+ str(search_results['numFound']))
-         
-            return_docs = search_results['docs']
+        if(search_failed == False):
 
+            return_docs = search_results['items']
+            
+            print("Comparer_view API items returned: "+ str(len(return_docs)))
+            
+            print(len(return_docs))
             datapages = []
             
+            counter = 0
+
             for each in return_docs:
-
                 
-                
+                volumeInfo = trycatch(each,"volumeInfo")
                 datapages.append({
-                    "title":each["title"],
-                    "author_name":trycatch(each,"author_name"),
-                    "book_key":each['key'].replace("/works/",""),
-                    "publish_date": trycatch(each,"publish_date"),
-                    "book_cover":book_cover(each)
+                    "title": trycatch(volumeInfo,"title"),
+                    "author_name":str(trycatch(volumeInfo,"authors")).replace("["," ").replace("]",""),
+                    "book_key": trycatch(each,"id"),
+                    "book_id": trycatch(trycatch(volumeInfo,"industryIdentifiers",firstobject=True,iterator=1),"identifier"),
+                    "publish_date": trycatch(volumeInfo,"publishedDate"),
+                    "book_cover":trycatch(trycatch(volumeInfo,"imageLinks"),"smallThumbnail"),
+                    "rating":trycatch(volumeInfo,"averageRating")
                     })
-
-   
+                counter += 1
+                
+            datapages.sort(key=lambda x: x["rating"], reverse=True)
+            x = 0
+            for each in range(startIndex):
+                datapages.insert(0,x)
+                x -= 1
+                
+                
+            counter = search_results['totalItems'] - counter  - startIndex    
+            
+            for each in range(counter):
+                datapages.append({})
+                
+            
+            print(len(datapages))
+            
+        
             paginator = Paginator(datapages,MAXPAGERESULTS)
             
-            search_pages = paginator.page(1)
+            search_pages = paginator.page(page)
             
             print("Pages: " + str(search_pages)) 
-            
-            return render(request, "comparer.html",{
-                    "page_name":"Comparer",
-                    "search_results":True,
-                    "search_failed":False,
-                    "search_pages": search_pages
-                })
-    
-        else:
-            return render(request, "comparer.html",{
-                    "page_name":"Comparer",
-                    "search_results":False,
-                    "search_failed":True
-                })
-            
-
-           
-
-    
+            search_results = True
     
     
     return render(request, "comparer.html",{
-        "page_name":"Comparer",
-        "search_results":False,
-        "search_failed":False
-    })
+            "page_name":"Comparer",
+            "search_results":search_results,
+            "search_failed":search_failed,
+            "search_pages": search_pages,
+            "searchtext":searchtext
+        })
     
-def book_view(request,book_key):
-    print("Book Loaded: "+ book_key)
+
+def book_view(request,book_key,book_id):
+    print("Book Loaded: "+ book_key + " / " + book_id)
     
-    ## OpenLibrary API - general information about the book
+    # Google Books APIs Main API Driving Stuff https://developers.google.com/books/docs/dynamic-links?csw=1
     try:
         API_except_status = False
-        API_response = requests.get("https://openlibrary.org/books/"+book_key+".json")
+        # API Example https://www.googleapis.com/books/v1/volumes/GNnxzQEACAAJ
+        # API Documentation - https://developers.google.com/books/docs/v1/using
+        API_response = requests.get("https://www.googleapis.com/books/v1/volumes/"+book_key)
         API_results = API_response.json()
         general_info = API_results
     except Exception as e:
         print("Book_view API request failed: " + str(e))
         API_except_status = True
-        
-    raw_description = general_info['description']['value']
+    
 
-    general_info['description']['short'] = raw_description[0:300]
-    general_info['description']['long'] = raw_description[300:raw_description.index("----------")]
-    # Google Books APIs https://developers.google.com/books/docs/dynamic-links?csw=1
-    # Amazon API
-    authors = general_info['authors']
-    authors_list = []
-    for each in authors: 
-        Author_API_response = requests.get("https://openlibrary.org/"+each['author']['key']+".json")
+    volumeInfo = general_info['volumeInfo']  
+
+    raw_description = volumeInfo['description'].replace("</i>","").replace("—","").replace("<i>","")
+
+
+    print(len(raw_description))
+    text_description = {'short':str(raw_description[0:300])}
+    try: 
+        description_drop = raw_description.index("---") 
+    except:
+        description_drop = None
         
-        authors_list.append({
-            'name' : str(Author_API_response.json()['name']),
-            'wikilink':str(Author_API_response.json()['wikipedia']),
-            'description':str(Author_API_response.json()['bio']['value'])
-            }) 
+  
+    text_description['long'] = raw_description[300:description_drop]
+    volumeInfo['text_description'] = text_description
+    authors_list = volumeInfo['authors']
+    counter = -1
+    
+    ## OpenLibrary API - rating about the book
     
     general_info['authors_list'] = authors_list
     return render(request, "book_view.html",{
-                "page_name":API_results["title"],
+                "page_name":volumeInfo["title"],
                 "book_key":book_key,
-                "general_info":general_info
+                "general_info":general_info,
+                "volumeInfo": volumeInfo
             })
     
     
-def trycatch(inobject,key):
+def trycatch(inobject,key,firstobject=False,iterator=None):
     try:
-        return inobject[key][0]
+        if(firstobject):
+            return inobject[key][iterator]
+        else:
+            return inobject[key]
     except:
-        return None
+        return False
         
 def book_cover(inobject):
     if "isbn" in inobject:
@@ -163,6 +193,8 @@ def book_cover(inobject):
         return "oclc/"+inobject["oclc"][0] 
     elif "goodreads" in inobject:
         return "goodreads/"+inobject["goodreads"][0] 
+    elif "key" in inobject:
+        return inobject["key"].replace("works","olid")
     else:
         return None
    
@@ -246,3 +278,6 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "register.html")
+
+
+
