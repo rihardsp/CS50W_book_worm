@@ -26,14 +26,14 @@ API_GOOGLE = config('Google_Key')
 def index(request):
     
     """ Main index function loaded every time user opens website"""
-    return render(request, "index.html",{"page_name":"Forum"})
+    return render(request, "index.html",{"page_name":"Forum","forum":True,})
    
    
 @login_required
 def library_view(request):
     
     """ Main index function loaded every time user opens website"""
-    return render(request, "library.html",{"page_name":"Library"})
+    return render(request, "library.html",{"page_name":"Library","library":True,})
 
 def search_book(requests,searchpattern):
     print("searchBook pressed" + searchpattern)
@@ -84,7 +84,7 @@ def comparer_view(request):
                 volumeInfo = trycatch(each,"volumeInfo")
                 datapages.append({
                     "title": trycatch(volumeInfo,"title"),
-                    "author_name":str(trycatch(volumeInfo,"authors")).replace("["," ").replace("]",""),
+                    "author_name":str(trycatch(volumeInfo,"authors")).replace("["," ").replace("]","").replace("<b>",""),
                     "book_key": trycatch(each,"id"),
                     "book_id": trycatch(trycatch(volumeInfo,"industryIdentifiers",firstobject=True,iterator=1),"identifier"),
                     "publish_date": trycatch(volumeInfo,"publishedDate"),
@@ -119,6 +119,7 @@ def comparer_view(request):
     
     return render(request, "comparer.html",{
             "page_name":"Comparer",
+            "comparer":True,
             "search_results":search_results,
             "search_failed":search_failed,
             "search_pages": search_pages,
@@ -142,9 +143,9 @@ def book_view(request,book_key,book_id):
         API_except_status = True
     
 
-    volumeInfo = general_info['volumeInfo']  
+    volumeInfo = general_info['volumeInfo']
 
-    raw_description = volumeInfo['description'].replace("</i>","").replace("—","").replace("<i>","")
+    raw_description = volumeInfo['description'].replace("</i>","").replace("—","").replace("<i>","").replace("<b>","").replace("</b>","").replace("<br>","").replace("<p>","").replace("</p>","")
 
 
     print(len(raw_description))
@@ -154,17 +155,25 @@ def book_view(request,book_key,book_id):
     except:
         description_drop = None
         
-  
+    # Retreive NY Times reviews
+    
+    #https://api.nytimes.com/svc/books/v3/reviews.json?author=Stephen+King&api-key=yourkey
+    
+    
     text_description['long'] = raw_description[300:description_drop]
     volumeInfo['text_description'] = text_description
     authors_list = volumeInfo['authors']
     counter = -1
-    
-    ## OpenLibrary API - rating about the book
-    
+
+    volumeInfo["URL_Amazon"] = "https://www.amazon.co.uk/s?k=" + volumeInfo['title'] + "=stripbooks&ref=nb_sb_noss_2"
+    volumeInfo["URL_GoodReads"] = "https://www.goodreads.com/book/isbn/" + volumeInfo['industryIdentifiers'][0]['identifier']
+    volumeInfo["URL_OpenLibrary"] = "https://openlibrary.org/isbn/" + volumeInfo['industryIdentifiers'][0]['identifier']
+    volumeInfo["URL_LibraryThing"] = "https://www.librarything.com/isbn/" + volumeInfo['industryIdentifiers'][0]['identifier']
+    print(volumeInfo['industryIdentifiers'][1]['identifier']) 
     general_info['authors_list'] = authors_list
     return render(request, "book_view.html",{
                 "page_name":volumeInfo["title"],
+                "comparer":True,
                 "book_key":book_key,
                 "general_info":general_info,
                 "volumeInfo": volumeInfo
@@ -203,23 +212,23 @@ def book_cover(inobject):
 def about_us_view(request):
     
     """ Main index function loaded every time user opens website"""
-    return render(request, "about_us.html",{"page_name":"About Us"})
+    return render(request, "about_us.html",{"page_name":"About Me","about":True})
     
 def contact_us_view(request):
     
     """ Main index function loaded every time user opens website"""
-    return render(request, "contact_us.html",{"page_name":"Contact Us"})
+    return render(request, "contact_us.html",{"page_name":"Contact Us","contact_us":True})
     
 def profile_view(request):
     
     """ Main index function loaded every time user opens website"""
-    return render(request, "profile.html",{"page_name":"Your Profile"})
+    return render(request, "profile.html",{"page_name":"Your Profile","active":"profile"})
     
     
 def settings_view(request):
     
     """ Main index function loaded every time user opens website"""
-    return render(request, "settings.html",{"page_name":"Settings"})
+    return render(request, "settings.html",{"page_name":"Settings","active":"settings"})
 
 
 ### API INTERACTIONS 

@@ -1,6 +1,10 @@
 document.addEventListener('DOMContentLoaded', function() {
+  var myModal = document.getElementById('myModal')
+  var myInput = document.getElementById('myInput')
 
-   
+  myModal.addEventListener('shown.bs.modal', function() {
+    myInput.focus()
+  })
 })
 
 function read_more() {
@@ -12,7 +16,8 @@ function read_more() {
     dots.style.display = "inline";
     btnText.innerHTML = "Read more";
     moreText.style.display = "none";
-  } else {
+  }
+  else {
     dots.style.display = "none";
     btnText.innerHTML = "Read less";
     moreText.style.display = "inline";
