@@ -15,7 +15,7 @@ import requests
 
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-from .models import User
+from .models import User, SavedBook, Blog, Emails
 from decouple import config
 
 MAXPAGERESULTS = 10
@@ -26,17 +26,50 @@ API_GOOGLE = config('Google_Key')
 def index(request):
     
     """ Main index function loaded every time user opens website"""
-    return render(request, "index.html",{"page_name":"Forum","forum":True,})
-   
-   
-@login_required
-def library_view(request):
-    
-    """ Main index function loaded every time user opens website"""
-    return render(request, "library.html",{"page_name":"Library","library":True,})
+    page = int(request.GET.get('page') or 1)
+    all_blogs = Blog.objects.all().order_by('-timestamp')
+     
+    datapages = []
 
-def search_book(requests,searchpattern):
-    print("searchBook pressed" + searchpattern)
+    counter= 0
+    for each in all_blogs:
+        book_key = each.book_id
+        short_text = each.text[:200]
+        long_text = each.text
+        
+        API_response = requests.get("https://www.googleapis.com/books/v1/volumes/"+book_key)
+        API_results = API_response.json()
+        volumeInfo = API_results['volumeInfo']
+
+        datapages.append({
+                    "card_id" : counter,
+                    "author": each.user,
+                    "title": each.title,
+                    "book_title": volumeInfo["title"],
+                    "book_authors": str(volumeInfo["authors"]),
+                    "short_text": short_text,
+                    "long_text": long_text,
+                    "book_key": book_key,
+                    "book_id": trycatch(trycatch(volumeInfo,"industryIdentifiers",firstobject=True,iterator=1),"identifier"),
+                    "book_cover": trycatch(trycatch(volumeInfo,"imageLinks"),"smallThumbnail"),
+                    "timestamp":each.timestamp
+                    })
+        counter += 1
+    paginator = Paginator(datapages,MAXPAGERESULTS)
+            
+    blog_pages = paginator.page(page)
+
+    
+    
+    return render(request, "index.html",{
+        "page_name":"Forum",
+        "forum":True,
+        "blog_pages":blog_pages
+    })
+   
+
+
+
     
 @csrf_exempt
 @login_required
@@ -171,13 +204,60 @@ def book_view(request,book_key,book_id):
     volumeInfo["URL_LibraryThing"] = "https://www.librarything.com/isbn/" + volumeInfo['industryIdentifiers'][0]['identifier']
     print(volumeInfo['industryIdentifiers'][1]['identifier']) 
     general_info['authors_list'] = authors_list
+    
+    book_in_library = SavedBook.objects.filter(book_id=book_key).filter(user=request.user).count() > 0
+    
+    
     return render(request, "book_view.html",{
                 "page_name":volumeInfo["title"],
                 "comparer":True,
                 "book_key":book_key,
                 "general_info":general_info,
-                "volumeInfo": volumeInfo
+                "volumeInfo": volumeInfo,
+                "book_in_library":book_in_library
             })
+    
+   
+@login_required
+def library_view(request):
+    
+    """ Library function that displays all books in the users library"""
+    page = int(request.GET.get('page') or 1)
+    users_books = SavedBook.objects.filter(user=request.user)
+    no_library_results = users_books.count() == 0    
+    library_pages = None
+    if(no_library_results==False):
+            
+        datapages = []
+        
+        for each in users_books:
+            
+            API_response = requests.get("https://www.googleapis.com/books/v1/volumes/"+each.book_id)
+            API_results = API_response.json()
+            volumeInfo = API_results['volumeInfo']
+
+            datapages.append({
+                        "title": trycatch(volumeInfo,"title"),
+                        "author_name":str(trycatch(volumeInfo,"authors")).replace("["," ").replace("]","").replace("<b>",""),
+                        "book_key": each.book_id,
+                        "book_id": trycatch(trycatch(volumeInfo,"industryIdentifiers",firstobject=True,iterator=1),"identifier"),
+                        "publish_date": trycatch(volumeInfo,"publishedDate"),
+                        "book_cover":trycatch(trycatch(volumeInfo,"imageLinks"),"smallThumbnail"),
+                        "rating":trycatch(volumeInfo,"averageRating")
+                        })
+        paginator = Paginator(datapages,MAXPAGERESULTS)
+                
+        library_pages = paginator.page(page)
+
+    
+    return render(request, "library.html",{
+        "page_name":"Library",
+        "library":True,
+        "no_books_exist":no_library_results,
+        "library_pages": library_pages
+    })
+    
+    
     
     
 def trycatch(inobject,key,firstobject=False,iterator=None):
@@ -189,45 +269,52 @@ def trycatch(inobject,key,firstobject=False,iterator=None):
     except:
         return False
         
-def book_cover(inobject):
-    if "isbn" in inobject:
-        return "isbn/"+inobject["isbn"][0]
-    elif "olid" in inobject:
-        return "olid/"+inobject["olid"][0]
-    elif "id" in inobject:
-        return "id/"+inobject["id"][0] 
-    elif "lccn" in inobject:
-        return "lccn/"+inobject["lccn"][0]  
-    elif "oclc" in inobject:
-        return "oclc/"+inobject["oclc"][0] 
-    elif "goodreads" in inobject:
-        return "goodreads/"+inobject["goodreads"][0] 
-    elif "key" in inobject:
-        return inobject["key"].replace("works","olid")
-    else:
-        return None
-   
 
     
 def about_us_view(request):
     
-    """ Main index function loaded every time user opens website"""
+    """ About us function to load about me section"""
     return render(request, "about_us.html",{"page_name":"About Me","about":True})
     
 def contact_us_view(request):
+
+
+    if(request.user.is_anonymous):
+        user_name = request.user
+        user_email = None
+    else:    
+        user = User.objects.get(username=request.user)
+        user_name = user.username
+        user_email = user.email
     
-    """ Main index function loaded every time user opens website"""
-    return render(request, "contact_us.html",{"page_name":"Contact Us","contact_us":True})
-    
-def profile_view(request):
-    
-    """ Main index function loaded every time user opens website"""
-    return render(request, "profile.html",{"page_name":"Your Profile","active":"profile"})
-    
+    """ Contact us function loads a website or processes a form """
+    if request.method == 'POST':
+        #try:
+        if(request.user.is_anonymous):
+            user = User.objects.get(username="AnonymousUser")
+            user_name = request.POST["name"]
+            user_email = request.POST["email"]
+
+      
+        save_email = Emails.objects.create(
+            user=user,
+            user_name = user_name,
+            user_email = user_email,
+            subject = request.POST["subject"],
+            text = request.POST["message"])
+        save_email.save()
+
+        return HttpResponse("OK",status=201)
+        #except Exception as e: 
+        #    print(e)
+        #    return HttpResponse(e,status=201)
+    else:
+        return render(request, "contact_us.html",{"user_name":user_name,"user_email":user_email, "page_name":"Contact Us","contact_us":True})
+
     
 def settings_view(request):
     
-    """ Main index function loaded every time user opens website"""
+    """ Users settings view"""
     return render(request, "settings.html",{"page_name":"Settings","active":"settings"})
 
 
@@ -288,5 +375,76 @@ def register(request):
     else:
         return render(request, "register.html")
 
+@csrf_exempt
+def book_toogle(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            user = request.user
+            book_id=data.get("book_key")
+            web_status = data.get("book_in_library")
+    
+            message = None
+            db_status = str(SavedBook.objects.filter(book_id=book_id).filter(user=request.user).count() > 0)
+    
+            if(db_status == web_status):
+                if(db_status == "False"):
+                    print("Should go here")
+                    book = SavedBook.objects.create(
+                            user=request.user,
+                            book_id=book_id,
+                            )
+                    book.save()
+                    name = True
+                    message = "Book added to the library"
+                else:
+                    SavedBook.objects.filter(book_id=book_id).filter(user=request.user).delete()
+                    message = "Book removed from the library"
+                    name = False
+                return_status = 201
+            else:
+                message = "Web library status was not the same as DB library status"
+                return_status = 403
+        except Exception as e:
+            print("...book_toggle exception:" + str(e))
+            return_status=500
+            message = "INTERNAL SERVER ERROR"
+            name = None
+            
+    return JsonResponse({"message": message, "name":name}, status=return_status)
+    
+@csrf_exempt
+def save_post(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            user = request.user
+            book_id=data.get("book_key")
+            blog_title = data.get("blog_title")
+            blog_text = data.get("blog_text")
+            
+            if(blog_text != None and blog_title != None and book_id != None):
+                blog = Blog.objects.create(
+                    user=request.user,
+                    book_id=book_id,
+                    title = blog_title,
+                    text = blog_text
+                    )
+                blog.save()
+                return_status = 201
+                message = "Blog " + blog_title + " saved successfully..."
+            else:
+                return_status = 400
+                message = "All fields have to be filled out. Check that book_id, title and text are present"
+            
 
-
+        
+        except Exception as e:
+            
+            print("...save_post exception:" + str(e))
+            return_status=500
+            message = str(e)
+            
+            
+            
+    return JsonResponse({"message": message}, status=return_status)

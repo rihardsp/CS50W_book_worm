@@ -8,12 +8,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 function monitor_search() {
-    console.log("Input received")
+
     let searchtext = document.getElementById("search-text").value
 
-    console.time("timespan")
 
-    console.log(searchtext)
     if (searchtext.length % 2 == 0) {
 
         let api_url = `https://www.googleapis.com/books/v1/volumes?q=` + searchtext

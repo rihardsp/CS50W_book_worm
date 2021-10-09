@@ -10,10 +10,10 @@ urlpatterns = [
     path("comparer", views.comparer_view, name="comparer"),
     path("about_us", views.about_us_view, name="about_us"),
     path("contact_us", views.contact_us_view, name="contact_us"),
-    path("profile", views.profile_view, name="profile"),
     path("settings", views.settings_view, name="settings"),
     
-  
+    #API Paths
     path("book/<str:book_key>/<str:book_id>", views.book_view, name="settings"),
-
+    path("library-toggle", views.book_toogle, name="book_toogle"),
+    path("save_post", views.save_post, name="book_toogle"),
 ]

@@ -27,7 +27,7 @@
         </div>
         <p class="description">{{ volumeInfo.text_description.short }}<span id="dots">...</span><span id="readmore">{{ volumeInfo.text_description.long }}</span><button onclick="read_more()" id="readmore-btn" class="btn btn-link" style="padding:0;top:0;">Read more</button></p>
       </div>
-      <div class="col-md-3 col-lg-3 align-items-stretch services" data-aos="fade-up" data-aos-delay="100">
+      <div class="col-lg-3 align-items-stretch services" data-aos="fade-up" data-aos-delay="100">
         <div>
           <br>
           <div class="icon-box icon-box-cyan">
@@ -50,32 +50,33 @@
                Write blog about this book!
               </button>
               <br>
-              <br> {% if blog_in_library %}
-              <button type="button" class="btn btn-secondary" style="width:100%; background: #1e4356; color: #fff;">Save to my library</button> {% else %}
-              <button type="button" class="btn btn-secondary" style="width:100%;background: #1e4354; color: #fff;">Remove from my library</button> {% endif %}
+              <br>
+              <button id="btn_library" name="{{ book_in_library }}" value="{{ book_key }}" type="button" class="btn btn-secondary" style="width:100%; background: #1e4356; color: #fff;">{% if book_in_library %}Remove from my library{% else %}Save to my library{% endif %}</button>
             </div>
             <!-- Modal -->
             <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-              <div class="modal-dialog">
+              <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                   <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel">My Thoughts on {{ volumeInfo.title }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
                   <div class="modal-body">
-                    <form>
+                    <form id="submit_blog_form">
                       <div class="form-group">
-                        <input type="email" class="form-control" id="blog_title" placeholder="Title">
+                        <input type="text" class="form-control" id="blog_title" placeholder="Title" required>
                       </div>
                       <br>
                       <div class="form-group">
-                        <textarea class="form-control" id="blog_text" rows="5" placeholder="Tell us what you thin about {{ volumeInfo.title }}..."></textarea>
+                        <textarea wrap="hard" class="form-control" id="blog_text" rows="8" placeholder="Tell us what you think about {{ volumeInfo.title }}..." required></textarea>
                       </div>
                     </form>
                   </div>
+                  <div id="alert_field" style="display:none" role="alert">
+                  </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" style="background: #1e4356; color: #fff;">Save blog</button>
+                    <button type="button" name="{{ book_key }}" id="btn_submit_blog_form" class="btn btn-primary" style="background: #1e4356; color: #fff;">Save Blog</button>
                   </div>
                 </div>
               </div>
@@ -94,7 +95,6 @@
 <section class="services">
   <div class="container">
     <div class="row">
-
       <div class="col-md-6 col-lg-3 align-items-stretch" data-aos="fade-up">
         <a href="{{ volumeInfo.URL_Amazon }}" target="_blank">
           <div class="icon-box icon-box-pink">
@@ -128,12 +128,12 @@
             </div>
             <h4 class="title">Open Library</h4>
             <p class="description">To book on Open Library</p>
-            <small style="font-size: 10px;">Open Library API does not share book ratings.</small>
+            <small style="font-size: 10px;">Open Library API does not share book ratings. You can still click on the link.</small>
           </div>
         </a>
       </div>
 
-      <div class="col-md-6 col-lg-3 align-items-stretch" data-aos="fade-up" data-aos-delay="100">
+      <div class="col-md-6 col-lg-3 align - items - stretch" data-aos="fade-up" data-aos-delay="100">
         <a href="{{ volumeInfo.URL_LibraryThing }}" target="_blank">
           <div class="icon-box icon-box-cyan">
             <div class="icon">
@@ -141,7 +141,7 @@
             </div>
             <h4 class="title">Library Thing</h4>
             <p class="description">To book on Library Thing</p>
-            <small style="font-size: 10px;">Library Thing API does not share book ratings</small>
+            <small style="font-size: 10px;">Library Thing API does not share book ratings. You can still click on the link.</small>
           </div>
         </a>
       </div>
@@ -157,6 +157,9 @@
      https://aws.amazon.com/machine-learning/
      
      -->
+<section class="services">
+  <p class="center">Insights into reviews section under construction....</p>
+</section>
 {% endblock %} {% block script %}
 
 <script src="{% static 'js/book_view.js' %}"></script>

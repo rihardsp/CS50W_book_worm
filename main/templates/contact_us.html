@@ -1,13 +1,23 @@
 {% extends "layout.html" %} {% load static %} {% block body %}
 <section class="contact" data-aos="fade-up" data-aos-easing="ease-in-out" data-aos-duration="500">
-    <form action="forms/contact.php" method="post" role="form" class="php-email-form">
+    <form action="contact_us" method="post" role="form" class="php-email-form">
+        {% csrf_token %}
         <div class="row">
+            {% if user.is_authenticated %}
+            <div class="col-md-6 form-group">
+                <input type="text" name="name" class="form-control" id="name" placeholder="{{ user_name }}" disabled>
+            </div>
+            <div class="col-md-6 form-group mt-3 mt-md-0">
+                <input type="email" class="form-control" name="email" id="email" placeholder="{{ user_email }}" disabled>
+            </div>
+            {% else %}
             <div class="col-md-6 form-group">
                 <input type="text" name="name" class="form-control" id="name" placeholder="Your Name" required>
             </div>
             <div class="col-md-6 form-group mt-3 mt-md-0">
-                <input type="email" class="form-control" name="email" id="email" placeholder="Your Email" required>
+                <input type="email" class="form-control" name="email" id="email" placeholder="Your email" required>
             </div>
+            {% endif %}
         </div>
         <div class="form-group mt-3">
             <input type="text" class="form-control" name="subject" id="subject" placeholder="Subject" required>
@@ -24,4 +34,7 @@
     </form>
 </section>
 
+{% endblock %} {% block script %}
+
+<script src="{% static 'js/contact.js' %}"></script>
 {% endblock %}

@@ -37,15 +37,15 @@
     {% if search_results %}
     {% for result in search_pages %}
             
-                <div id="main_card-{{ post.id }}" class="card" style="width:95%; left:3%">
-                    <div id="text_card-{{ post.id }}" class="card-body">
+                <div id="main_card-{{ result.id }}" class="card" style="width:95%; left:3%">
+                    <div id="text_card-{{ result.id }}" class="card-body">
                         <div class="row">
                             <div class="col-lg-2">
                                 <a  href="book/{{ result.book_key }}/{{ result.book_id }}"><img src="{{ result.book_cover }}"></a>
                                  </div>
                             <div class="col-lg-4">
                                 <h5 class="card-title"><a style="color:black;" href="book/{{ result.book_key }}/{{ result.book_id }}">{{ result.title }}</a></h5>
-                                <p id="text_field-{{ post.id }}" class="card-text">{{ result.author_name }}</p>
+                                <p id="text_field-{{ result.id }}" class="card-text">{{ result.author_name }}</p>
                                 <p class="card-text"><small class="text-muted">{{ result.publish_date }} </small></p>
                             </div>
                         </div>
