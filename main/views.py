@@ -1,39 +1,46 @@
-import json
-import time
-# TO BE DONE import logging
+# -----------------------------------------------------------
+# Book Worm views python file. in this file all application views are included.
+#
+# email rihards.paze@gmail.com
+# -----------------------------------------------------------
+
+
+import requests
+from datetime import datetime
+
+from django import forms
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import PasswordChangeView
+from django.contrib.messages.views import SuccessMessageMixin
+from django.core.paginator import Paginator
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
-from django.urls import reverse
-from django.http import JsonResponse
-from datetime import datetime
-from django.utils.timezone import get_current_timezone
-import pytz
-from django.core.paginator import Paginator
-import requests
-from django.contrib import messages
-from django import forms
-from django.contrib.auth.decorators import login_required
+from django.urls import reverse, reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
-from .models import User, SavedBook, Blog, Emails
-from decouple import config
 
-from django.urls import reverse_lazy
-from django.contrib.auth.views import PasswordChangeView
-from django.contrib.messages.views import SuccessMessageMixin
+from .models import User, SavedBook, Blog, Emails
+
 
 MAXPAGERESULTS = 10
-API_GOOGLE = config('Google_Key')
 
 
 
 
-### VIEWS OF THE APPLICATIONS
+### VIEWS OF THE APPLICATION
 
 def index(request):
     
-    """ Main index function loaded every time user opens website"""
+    """ Main index function loaded every time user opens website. The application retreives all blogs and creates a pagination which is sent to the front-end
+     
+     Parameters
+        ----------
+        request : request object, mandatory
+            Request received from the client
+    """
+    
     page = int(request.GET.get('page') or 1)
     all_blogs = Blog.objects.all().order_by('-timestamp')
      
@@ -60,7 +67,7 @@ def index(request):
                     "short_text": short_text,
                     "long_text": long_text,
                     "book_key": book_key,
-                    "book_id": trycatch(trycatch(volumeInfo,"industryIdentifiers",firstobject=True,iterator=1),"identifier"),
+                    "book_id": trycatch(trycatch(volumeInfo,"industryIdentifiers",iterator_needed=True,iterator=1),"identifier"),
                     "book_cover": trycatch(trycatch(volumeInfo,"imageLinks"),"smallThumbnail"),
                     "timestamp":each.timestamp
                     })
@@ -84,12 +91,22 @@ def index(request):
 @csrf_exempt
 @login_required
 def comparer_view(request):
-    """ Comparer view loads searchbar or search_results"""
+    """ Comparer view loads searchbar or search_results depending on the type of the request. 
+        If the user navigated to the Comparer view the search field is only displayed;
+        If the user has searched for the book the application returns paginated books retreived from GOOGLE API
+
+     Parameters
+        ----------
+        request : request object, mandatory
+            Request received from the client
+    """
+    
     search_pages = []
     search_results = False
     search_failed = False
     print("Comparer View Loading")
     
+    # Search text checks that there's search-text entered in the URL and if not skips the book search
     searchtext = request.GET.get('search-text','')
     print("searchtext: " + searchtext)
     
@@ -99,6 +116,8 @@ def comparer_view(request):
         print("PAGE RECEVEID: " + str(page))
         print("USER SEARCHED FOR: " + searchtext)
         try: 
+            # Based on which page the user currently is on 
+            # in the particular search the function calculates which results should be requested
             startIndex = (page * 10) - 10
             search_response = requests.get("https://www.googleapis.com/books/v1/volumes?q="+searchtext+"&startIndex="+ str(startIndex) + "&maxResults="+str(MAXPAGERESULTS))
             print("Comparer_view API request returned: " + str(search_response))
@@ -121,7 +140,8 @@ def comparer_view(request):
             datapages = []
             
             counter = 0
-
+            
+            # Builds the pagination object
             for each in return_docs:
                 
                 volumeInfo = trycatch(each,"volumeInfo")
@@ -129,7 +149,7 @@ def comparer_view(request):
                     "title": trycatch(volumeInfo,"title"),
                     "author_name":str(trycatch(volumeInfo,"authors")).replace("["," ").replace("]","").replace("<b>",""),
                     "book_key": trycatch(each,"id"),
-                    "book_id": trycatch(trycatch(volumeInfo,"industryIdentifiers",firstobject=True,iterator=1),"identifier"),
+                    "book_id": trycatch(trycatch(volumeInfo,"industryIdentifiers",iterator_needed=True,iterator=1),"identifier"),
                     "publish_date": trycatch(volumeInfo,"publishedDate"),
                     "book_cover":trycatch(trycatch(volumeInfo,"imageLinks"),"smallThumbnail"),
                     "rating":trycatch(volumeInfo,"averageRating")
@@ -169,12 +189,27 @@ def comparer_view(request):
             "searchtext":searchtext
         })
     
-
+@login_required
 def book_view(request,book_key,book_id):
+    
+    """ Book view loads book view based on bok_key given by the URL. 
+        The book view uses google books api to retreive information about the book.
+     Parameters
+        ----------
+        request : request object, mandatory
+            Request received from the client
+        book_key : str, mandatory 
+            Google book_key received from the URL clicked on search results (comparision view)
+        book_id : str, mandatory 
+            Books ISIN number
+    """
+    
+    
     print("Book Loaded: "+ book_key + " / " + book_id)
     
     # Google Books APIs Main API Driving Stuff https://developers.google.com/books/docs/dynamic-links?csw=1
     try:
+        # Retreive book information from google
         API_except_status = False
         # API Example https://www.googleapis.com/books/v1/volumes/GNnxzQEACAAJ
         # API Documentation - https://developers.google.com/books/docs/v1/using
@@ -185,12 +220,12 @@ def book_view(request,book_key,book_id):
         print("Book_view API request failed: " + str(e))
         API_except_status = True
     
-
+    #Volume Infor contains most of the information about the book.
     volumeInfo = general_info['volumeInfo']
 
     raw_description = volumeInfo['description'].replace("</i>","").replace("—","").replace("<i>","").replace("<b>","").replace("</b>","").replace("<br>","").replace("<p>","").replace("</p>","")
 
-
+    #create short and long description
     print(len(raw_description))
     text_description = {'short':str(raw_description[0:300])}
     try: 
@@ -205,9 +240,12 @@ def book_view(request,book_key,book_id):
     
     text_description['long'] = raw_description[300:description_drop]
     volumeInfo['text_description'] = text_description
-    authors_list = volumeInfo['authors']
+    authors_list = trycatch(volumeInfo,'authors')
+    
     counter = -1
-
+    
+    # prepare other links based on url schematics for comparision
+    
     volumeInfo["URL_Amazon"] = "https://www.amazon.co.uk/s?k=" + volumeInfo['title'] + "=stripbooks&ref=nb_sb_noss_2"
     volumeInfo["URL_GoodReads"] = "https://www.goodreads.com/book/isbn/" + volumeInfo['industryIdentifiers'][0]['identifier']
     volumeInfo["URL_OpenLibrary"] = "https://openlibrary.org/isbn/" + volumeInfo['industryIdentifiers'][0]['identifier']
@@ -231,7 +269,15 @@ def book_view(request,book_key,book_id):
 @login_required
 def library_view(request):
     
-    """ Library function that displays all books in the users library"""
+    """ Similar to comparision_view function shows all books, but this time it uses book_keys 
+    saved in the library and iterates through them by getting data needed from google API. 
+    
+     Parameters
+        ----------
+        request : request object, mandatory
+            Request received from the client
+
+    """
     page = int(request.GET.get('page') or 1)
     users_books = SavedBook.objects.filter(user=request.user)
     no_library_results = users_books.count() == 0    
@@ -250,7 +296,7 @@ def library_view(request):
                         "title": trycatch(volumeInfo,"title"),
                         "author_name":str(trycatch(volumeInfo,"authors")).replace("["," ").replace("]","").replace("<b>",""),
                         "book_key": each.book_id,
-                        "book_id": trycatch(trycatch(volumeInfo,"industryIdentifiers",firstobject=True,iterator=1),"identifier"),
+                        "book_id": trycatch(trycatch(volumeInfo,"industryIdentifiers",iterator_needed=True,iterator=1),"identifier"),
                         "publish_date": trycatch(volumeInfo,"publishedDate"),
                         "book_cover":trycatch(trycatch(volumeInfo,"imageLinks"),"smallThumbnail"),
                         "rating":trycatch(volumeInfo,"averageRating")
@@ -273,12 +319,26 @@ def library_view(request):
     
 def about_us_view(request):
     
-    """ About us function to load about me section"""
+    """ About us function to load about me section
+    
+     Parameters
+        ----------
+        request : request object, mandatory
+            Request received from the client
+
+    """
     return render(request, "about_us.html",{"page_name":"About Me","about":True})
     
 def contact_us_view(request):
     
-    """ Contact us function loads a website or processes a form """
+    """ Contact us function loads a website or processes a form with user question
+    
+     Parameters
+        ----------
+        request : request object, mandatory
+            Request received from the client
+    """
+    
 
     if(request.user.is_anonymous):
         user_name = request.user
@@ -312,10 +372,18 @@ def contact_us_view(request):
     else:
         return render(request, "contact_us.html",{"user_name":user_name,"user_email":user_email, "page_name":"Contact Us","contact_us":True})
 
-    
+@login_required
 def settings_view(request):
     
-    """ Users settings view"""
+    """ Users settings view, which uses UpdateUserForm class
+   
+     Parameters
+    ----------
+    request : request object, mandatory
+        Request received from the client
+            """
+    
+    
     if request.method == 'POST':
         user_form = UpdateUserForm(request.POST, instance=request.user)
   
@@ -333,7 +401,7 @@ def settings_view(request):
     })
 
 
-### LOGIN / LOGOUT / REGISTER SIDE OF THE APPLICATION
+### LOGIN / LOGOUT / REGISTER SIDE OF THE APPLICATION. These are standard Django Functions, please reffer to DJango documentation for futher information
     
 def login_view(request):
     if request.method == "POST":
@@ -393,88 +461,27 @@ class ChangePasswordView(SuccessMessageMixin, PasswordChangeView):
 
 
 
-
-### API INTERACTIONS 
-
-@csrf_exempt
-def book_toogle(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            user = request.user
-            book_id=data.get("book_key")
-            web_status = data.get("book_in_library")
-    
-            message = None
-            db_status = str(SavedBook.objects.filter(book_id=book_id).filter(user=request.user).count() > 0)
-    
-            if(db_status == web_status):
-                if(db_status == "False"):
-                    print("Should go here")
-                    book = SavedBook.objects.create(
-                            user=request.user,
-                            book_id=book_id,
-                            )
-                    book.save()
-                    name = True
-                    message = "Book added to the library"
-                else:
-                    SavedBook.objects.filter(book_id=book_id).filter(user=request.user).delete()
-                    message = "Book removed from the library"
-                    name = False
-                return_status = 201
-            else:
-                message = "Web library status was not the same as DB library status"
-                return_status = 403
-        except Exception as e:
-            print("...book_toggle exception:" + str(e))
-            return_status=500
-            message = "INTERNAL SERVER ERROR"
-            name = None
-            
-    return JsonResponse({"message": message, "name":name}, status=return_status)
-    
-@csrf_exempt
-def save_post(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            user = request.user
-            book_id=data.get("book_key")
-            blog_title = data.get("blog_title")
-            blog_text = data.get("blog_text")
-            
-            if(blog_text != None and blog_title != None and book_id != None):
-                blog = Blog.objects.create(
-                    user=request.user,
-                    book_id=book_id,
-                    title = blog_title,
-                    text = blog_text
-                    )
-                blog.save()
-                return_status = 201
-                message = "Blog " + blog_title + " saved successfully..."
-            else:
-                return_status = 400
-                message = "All fields have to be filled out. Check that book_id, title and text are present"
-            
-
-        
-        except Exception as e:
-            
-            print("...save_post exception:" + str(e))
-            return_status=500
-            message = str(e)
-            
-            
-            
-    return JsonResponse({"message": message}, status=return_status)
     
 ## HELPER FUNCTIONS  
     
-def trycatch(inobject,key,firstobject=False,iterator=None):
+def trycatch(inobject,key,iterator_needed=False,iterator=None):
+    
+    """ Try catch helper function to return None in case library key fails to retrieve data. Also can be used to retreive particualr item from a list. 
+   
+     Parameters
+    ----------
+    inobject : object, mandatory
+        any data dictionary with key-value pairs
+    key : str, mandatory
+        key which has to be used to retreive the data value
+    iterator_needed : bool, optional
+        does the iterator is needed. Default = False
+    iterator : int, optional
+        which item from the list is needed to be retreived. 
+    """
+    
     try:
-        if(firstobject):
+        if(iterator_needed):
             return inobject[key][iterator]
         else:
             return inobject[key]
@@ -486,6 +493,23 @@ def trycatch(inobject,key,firstobject=False,iterator=None):
 ## FOORM CLASSES
 
 class UpdateUserForm(forms.ModelForm):
+    
+    """ Form displayed in users settings view. Retreives data about users. 
+    
+    Attributes
+    ----------
+    username : CharField
+        Username input field. Max_length =100
+    first_name : CharField
+        firstname input field. Max_length =100
+    last_name : CharField
+        lastname input field. Max_length =100
+    email : emailField
+        email input field. Max_length =100
+
+    """
+    
+    
     username = forms.CharField(max_length=100,
                                required=True,
                                widget=forms.TextInput(attrs={'class': 'form-control'}))

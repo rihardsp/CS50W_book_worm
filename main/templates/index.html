@@ -56,9 +56,7 @@
                   <div class="modal-content">
                     <div class="modal-header">
                       <h5 class="modal-title" id="Modal_{{ result.card_id }}Title">{{ result.title }} by {{ result.author_first }} {{ result.author_last }} ({{result.author}})</h5>
-                      <button type="button" class="close" style="width:20%; background: transparent; color: #1e4356; border-style:hidden; border-radius: 5px;" data-bs-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                       {{ result.long_text }}
