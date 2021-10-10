@@ -1,6 +1,8 @@
 {% extends "layout.html" %} {% load static %} {% block body %} {% if user.is_authenticated %}
 
 <!-- ======= Top Section if  authenticated ======= -->
+{% if blog_pages.has_previous %}
+{% else %}
 <section id="hero-no-slider" class="d-flex justify-cntent-center align-items-center">
   <div class="container position-relative" data-aos="fade-up" data-aos-delay="100">
     <div class="row justify-content-center">
@@ -14,6 +16,7 @@
     </div>
   </div>
 </section>
+{% endif %}
 <!-- End Hero No Slider Sectio -->
 <section id="blogs" class="blog">
   <div class="form-content my-3 p-3">
@@ -79,28 +82,28 @@
     <ul class="pagination justify-content-center">
       {% if blog_pages.has_previous %}
       <li class="page-item">
-        <a class="page-link" href="comparer?search-text={{ searchtext }}&page=1">&laquo; first</a>
+        <a class="page-link" href="?page=1">&laquo; first</a>
       </li>
       <li class="page-item">
-        <a class="page-link" href="comparer?search-text={{ searchtext }}&page={{ blog_pages.previous_page_number }}">previous</a>
+        <a class="page-link" href="?page={{ blog_pages.previous_page_number }}">previous</a>
       </li>
       {% else %}
       <li class="page-item disabled">
         <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
       </li>
       {% endif %} {% if blog_pages.number|add:'-4' > 1 %}
-      <li class="page-item"><a class="page-link" href="comparer?search-text={{ searchtext }}&page={{ blog_pages.number|add:'-5' }}">&hellip;</a></li>
+      <li class="page-item"><a class="page-link" href="?page={{ blog_pages.number|add:'-5' }}">&hellip;</a></li>
       {% endif %} {% for i in blog_pages.paginator.page_range %} {% if blog_pages.number == i %}
       <li class="page-item active" aria-current="page">
         <span class="page-link">{{ i }}<span style="display:none">(current)</span></span>
       </li>
       {% elif i > blog_pages.number|add:'-5' and i < blog_pages.number|add:'5' %} <li class="page-item">
-        <a class="page-link" href="comparer?search-text={{ searchtext }}&page={{ i }}">{{ i }}</a>
+        <a class="page-link" href="?page={{ i }}">{{ i }}</a>
         </li>
         {% endif %} {% endfor %} {% if blog_pages.paginator.num_pages > blog_pages.number|add:'4' %}
-        <li class="page-item"><a class="page-link" href="comparer?search-text={{ searchtext }}&page={{ blog_pages.number|add:'5' }}">&hellip;</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ blog_pages.number|add:'5' }}">&hellip;</a></li>
         {% endif %} {% if blog_pages.has_next %}
-        <li class="page-item"><a class="page-link" href="comparer?search-text={{ searchtext }}&page={{ blog_pages.next_page_number }}">&raquo;</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ blog_pages.next_page_number }}">&raquo;</a></li>
         {% else %}
         <li class="page-item disabled">
           <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Next</a>
