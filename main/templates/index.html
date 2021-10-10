@@ -1,13 +1,13 @@
 {% extends "layout.html" %} {% load static %} {% block body %} {% if user.is_authenticated %}
 
 <!-- ======= Top Section if  authenticated ======= -->
-<section id="hero-no-slider"  class="d-flex justify-cntent-center align-items-center">
+<section id="hero-no-slider" class="d-flex justify-cntent-center align-items-center">
   <div class="container position-relative" data-aos="fade-up" data-aos-delay="100">
     <div class="row justify-content-center">
       <div class="col-xl-8">
         <h2>Welcome {{ user }} to Book Worm</h2>
         <p>Scroll down to see what your friends are blogging about the books they've read</p>
-        <p>Select Comparer to finda  book to compare</p>
+        <p>Select Comparer to finda book to compare</p>
         <p>Go to your library and check on the books you've saved</p>
         <p>Or express yourself and write a blog about a book you've read...</p>
       </div>
@@ -15,93 +15,102 @@
   </div>
 </section>
 <!-- End Hero No Slider Sectio -->
-<br>
-    <div class="section-title">
-      <h2>Blog Posts</h2>
-      <p>To write your own post go to comparer and find a book. Than open the book you would like to write about and feel free to write whatever's on your mind...</p></div>
-  <section id="blogs">
+<section id="blogs" class="blog">
+  <div class="form-content my-3 p-3">
     <div class="container">
-      {% for result in blog_pages %}
-      <div class="d-flex flex-column justify-content-center p-8">
-        
-        <div class="card-header">
-        <span><strong>{{ result.author }}</strong> wrote about <strong>{{ result.book_title }}</strong><small style="float:right" class="text-muted">{{ result.timestamp }} </small></span>
-        </div>
-        <div class="card-body">
-          <div class="row">
-            <div class="col-10">
-              <h5 class="card-title">{{ result.title }}</h5>
-              <p class="card-text">{{ result.short_text }}...</p>
-              <br>
-               <button type="button" class="btn btn-primary" style="width:20%; background: #1e4356; color: #fff;" data-bs-toggle="modal" data-bs-target="#Modal_{{ result.card_id }}">
+      <div class="row justify-content-center">
+        <div class="col-lg-12">
+          <div class="card-header justify-content-center">
+            <h3 class="font-weight-light my-4 text-center">Blog Posts</h3>
+          </div>
+          <br>
+          <div id="searchresults">
+            {% for result in blog_pages %}
+            <div class="card shadow-lg border-0 rounded-lg mt-0 mb-3">
+              <div class="d-flex flex-column justify-content-center p-8">
+                <div class="card-header">
+                  <span><strong>{{ result.author }}</strong> wrote about <strong>{{ result.book_title }}</strong><small style="float:right" class="text-muted">{{ result.timestamp }} </small></span>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-10">
+                      <h5 class="card-title">{{ result.title }}</h5>
+                      <p class="card-text">{{ result.short_text }}...</p>
+                      <br>
+                      <button type="button" class="btn btn-primary" style="width:20%; background: #1e4356; color: #fff;" data-bs-toggle="modal" data-bs-target="#Modal_{{ result.card_id }}">
                 Read Blog
               </button>
-            </div>
-            <div class="col-2" style="float:right">
-               <a href="book/{{ result.book_key }}/{{ result.book_id }}"><img src="{{ result.book_cover }}"></a>
-            </div>
-          </div>
-        </div>
-      </div>
-      <br>
-      <!-- Button trigger modal -->
-      <!-- Modal -->
-      <div class="modal fade" id="Modal_{{ result.card_id }}" tabindex="-1" role="dialog" aria-labelledby="Modal_Label{{ result.card_id }}" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="Modal_{{ result.card_id }}Title">{{ result.title }} by {{ result.author }}</h5>
-                <button type="button" class="close" style="width:20%; background: transparent; color: #1e4356; border-style:hidden; border-radius: 5px;" data-bs-dismiss="modal" aria-label="Close">
+                    </div>
+                    <div class="col-2" style="float:right">
+                      <a href="book/{{ result.book_key }}/{{ result.book_id }}"><img src="{{ result.book_cover }}"></a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <br>
+              <!-- Button trigger modal -->
+              <!-- Modal -->
+              <div class="modal fade" id="Modal_{{ result.card_id }}" tabindex="-1" role="dialog" aria-labelledby="Modal_Label{{ result.card_id }}" aria-hidden="true">
+                <div class="modal-dialog modal-xl" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="Modal_{{ result.card_id }}Title">{{ result.title }} by {{ result.author_first }} {{ result.author_last }} ({{result.author}})</h5>
+                      <button type="button" class="close" style="width:20%; background: transparent; color: #1e4356; border-style:hidden; border-radius: 5px;" data-bs-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
+                    </div>
+                    <div class="modal-body">
+                      {{ result.long_text }}
+                    </div>
+                    <div class="modal-footer">
+                      <a href="book/{{ result.book_key }}/{{ result.book_id }}"><button type="button"  style="width:100%; background: #1e4356; color: #fff;" class="btn btn-primary">Open Book</button></a>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="modal-body">
-              {{ result.long_text }}
-            </div>
-            <div class="modal-footer">
-              <a href="book/{{ result.book_key }}/{{ result.book_id }}"><button type="button"  style="width:100%; background: #1e4356; color: #fff;" class="btn btn-primary">Open Book</button></a>
-            </div>
+            {% endfor %}
           </div>
         </div>
       </div>
-    {% endfor %}
-    <br>
     </div>
-    <nav aria-label="Page navigation example">
-      <ul class="pagination justify-content-center">
-        {% if blog_pages.has_previous %}
-        <li class="page-item">
-          <a class="page-link" href="comparer?search-text={{ searchtext }}&page=1">&laquo; first</a>
+  </div>
+  <br>
+  <nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+      {% if blog_pages.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="comparer?search-text={{ searchtext }}&page=1">&laquo; first</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="comparer?search-text={{ searchtext }}&page={{ blog_pages.previous_page_number }}">previous</a>
+      </li>
+      {% else %}
+      <li class="page-item disabled">
+        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+      </li>
+      {% endif %} {% if blog_pages.number|add:'-4' > 1 %}
+      <li class="page-item"><a class="page-link" href="comparer?search-text={{ searchtext }}&page={{ blog_pages.number|add:'-5' }}">&hellip;</a></li>
+      {% endif %} {% for i in blog_pages.paginator.page_range %} {% if blog_pages.number == i %}
+      <li class="page-item active" aria-current="page">
+        <span class="page-link">{{ i }}<span style="display:none">(current)</span></span>
+      </li>
+      {% elif i > blog_pages.number|add:'-5' and i < blog_pages.number|add:'5' %} <li class="page-item">
+        <a class="page-link" href="comparer?search-text={{ searchtext }}&page={{ i }}">{{ i }}</a>
         </li>
-        <li class="page-item">
-          <a class="page-link" href="comparer?search-text={{ searchtext }}&page={{ blog_pages.previous_page_number }}">previous</a>
-        </li>
+        {% endif %} {% endfor %} {% if blog_pages.paginator.num_pages > blog_pages.number|add:'4' %}
+        <li class="page-item"><a class="page-link" href="comparer?search-text={{ searchtext }}&page={{ blog_pages.number|add:'5' }}">&hellip;</a></li>
+        {% endif %} {% if blog_pages.has_next %}
+        <li class="page-item"><a class="page-link" href="comparer?search-text={{ searchtext }}&page={{ blog_pages.next_page_number }}">&raquo;</a></li>
         {% else %}
         <li class="page-item disabled">
-          <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+          <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Next</a>
         </li>
-        {% endif %} {% if blog_pages.number|add:'-4' > 1 %}
-        <li class="page-item"><a class="page-link" href="comparer?search-text={{ searchtext }}&page={{ blog_pages.number|add:'-5' }}">&hellip;</a></li>
-        {% endif %} {% for i in blog_pages.paginator.page_range %} {% if blog_pages.number == i %}
-        <li class="page-item active" aria-current="page">
-          <span class="page-link">{{ i }}<span style="display:none">(current)</span></span>
-        </li>
-        {% elif i > blog_pages.number|add:'-5' and i < blog_pages.number|add:'5' %}
-        <li class="page-item">
-          <a class="page-link" href="comparer?search-text={{ searchtext }}&page={{ i }}">{{ i }}</a>
-          </li>
-          {% endif %} {% endfor %} {% if blog_pages.paginator.num_pages > blog_pages.number|add:'4' %}
-          <li class="page-item"><a class="page-link" href="comparer?search-text={{ searchtext }}&page={{ blog_pages.number|add:'5' }}">&hellip;</a></li>
-          {% endif %} {% if blog_pages.has_next %}
-          <li class="page-item"><a class="page-link" href="comparer?search-text={{ searchtext }}&page={{ blog_pages.next_page_number }}">&raquo;</a></li>
-          {% else %}
-          <li class="page-item disabled">
-            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Next</a>
-          </li>
-          {% endif %}
-      </ul>
-    </nav>
-  </section>
+        {% endif %}
+    </ul>
+  </nav>
+</section>
 
 
 {% else %}

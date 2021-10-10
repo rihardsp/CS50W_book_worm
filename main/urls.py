@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import ChangePasswordView
 
 urlpatterns = [
     path("", views.index, name="index"),
@@ -11,6 +12,8 @@ urlpatterns = [
     path("about_us", views.about_us_view, name="about_us"),
     path("contact_us", views.contact_us_view, name="contact_us"),
     path("settings", views.settings_view, name="settings"),
+    path('password-change', ChangePasswordView.as_view(), name='password_change'),
+
     
     #API Paths
     path("book/<str:book_key>/<str:book_id>", views.book_view, name="settings"),

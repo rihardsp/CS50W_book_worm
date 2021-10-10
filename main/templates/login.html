@@ -1,35 +1,30 @@
-{% extends "layout.html" %}
-
-{% block body %}
-
-    {% if message %}
-        <div>{{ message }}</div>
-    {% endif %}
-      <section id="hero-no-slider" class="d-flex justify-cntent-center align-items-center">
-        <div class="container position-relative" data-aos="fade-up" data-aos-delay="100">
-          <div class="row justify-content-center">
-            <div class="col-lg-6">
-                <form id"register_form" action="{% url 'login' %}" method="post">
-                    {% csrf_token %}
-                  <div class="row">
-                    <div class="form-group mt-3">
-                      <input type="text" name="username" class="form-control" id="username" placeholder="Username" required>
-                    </div>
-                  </div>
-                  <div class="form-group mt-3">
-                    <input type="password" class="form-control" name="password" id="passowrd" placeholder="Password" required>
-                  </div>
-                <br>
-                     <input type="submit" class="btn-get-started-form" value="Login">
-                     
-                </form>
-              </div>
+{% extends "layout.html" %} {% block body %} {% if message %}
+<div>{{ message }}</div>
+{% endif %}
+<section id="hero-no-slider" class="d-flex justify-cntent-center align-items-center">
+  <div class="container position-relative" data-aos="fade-up" data-aos-delay="100">
+    <div class="row justify-content-center">
+      <div class="col-lg-6">
+        <form id="register_form" action="{% url 'login' %}" method="post" class="php-email-form">
+          {% csrf_token %}
+          <div class="row">
+            <div class="form-group mt-3">
+              <input type="text" name="username" class="form-control" id="username" placeholder="Username" required>
+            </div>
+          </div>
+          <div class="form-group mt-3">
+            <input type="password" class="form-control" name="password" id="passowrd" placeholder="Password" required>
           </div>
           <br>
-          <p class="animate__animated animate__fadeInUp">Don't have an account? <a href="{% url 'register' %}">Register here.</a></p>
-      
-        </div>
-         </section>
-    
+          <input type="submit" class="btn-get-started " style="width:20%; background: #1e4356; color: #fff;" value="Login">
+        </form>
+      </div>
+    </div>
+    <br>
+    <p class="animate__animated animate__fadeInUp">Don't have an account? <a href="{% url 'register' %}">Register here.</a></p>
+
+  </div>
+</section>
+
 
 {% endblock %}

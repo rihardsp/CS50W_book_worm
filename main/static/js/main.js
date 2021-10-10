@@ -1,9 +1,9 @@
 /**
-* Template Name: Moderna - v4.5.0
-* Template URL: https://bootstrapmade.com/free-bootstrap-template-corporate-moderna/
-* Author: BootstrapMade.com
-* License: https://bootstrapmade.com/license/
-*/
+ * Template Name: Moderna - v4.5.0
+ * Template URL: https://bootstrapmade.com/free-bootstrap-template-corporate-moderna/
+ * Author: BootstrapMade.com
+ * License: https://bootstrapmade.com/license/
+ */
 (function() {
   "use strict";
 
@@ -14,7 +14,8 @@
     el = el.trim()
     if (all) {
       return [...document.querySelectorAll(el)]
-    } else {
+    }
+    else {
       return document.querySelector(el)
     }
   }
@@ -27,7 +28,8 @@
     if (selectEl) {
       if (all) {
         selectEl.forEach(e => e.addEventListener(type, listener))
-      } else {
+      }
+      else {
         selectEl.addEventListener(type, listener)
       }
     }
@@ -66,7 +68,8 @@
     const headerScrolled = () => {
       if (window.scrollY > 100) {
         selectHeader.classList.add('header-scrolled')
-      } else {
+      }
+      else {
         selectHeader.classList.remove('header-scrolled')
       }
     }
@@ -82,7 +85,8 @@
     const toggleBacktotop = () => {
       if (window.scrollY > 100) {
         backtotop.classList.add('active')
-      } else {
+      }
+      else {
         backtotop.classList.remove('active')
       }
     }
@@ -112,37 +116,11 @@
   /**
    * Scrool with ofset on links with a class name .scrollto
    */
-  on('click', '.scrollto', function(e) {
-    if (select(this.hash)) {
-      e.preventDefault()
 
-      let navbar = select('#navbar')
-      if (navbar.classList.contains('navbar-mobile')) {
-        navbar.classList.remove('navbar-mobile')
-        let navbarToggle = select('.mobile-nav-toggle')
-        navbarToggle.classList.toggle('bi-list')
-        navbarToggle.classList.toggle('bi-x')
-      }
-      scrollto(this.hash)
-    }
-  }, true)
 
   /**
    * Skills animation
    */
-  let skilsContent = select('.skills-content');
-  if (skilsContent) {
-    new Waypoint({
-      element: skilsContent,
-      offset: '80%',
-      handler: function(direction) {
-        let progress = select('.progress .progress-bar', true);
-        progress.forEach((el) => {
-          el.style.width = el.getAttribute('aria-valuenow') + '%'
-        });
-      }
-    })
-  }
 
   /**
    * Testimonials slider

@@ -4,7 +4,7 @@ import time
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.http import JsonResponse
 from datetime import datetime
@@ -12,14 +12,22 @@ from django.utils.timezone import get_current_timezone
 import pytz
 from django.core.paginator import Paginator
 import requests
-
+from django.contrib import messages
+from django import forms
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from .models import User, SavedBook, Blog, Emails
 from decouple import config
 
+from django.urls import reverse_lazy
+from django.contrib.auth.views import PasswordChangeView
+from django.contrib.messages.views import SuccessMessageMixin
+
 MAXPAGERESULTS = 10
 API_GOOGLE = config('Google_Key')
+
+
+
 
 ### VIEWS OF THE APPLICATIONS
 
@@ -44,6 +52,8 @@ def index(request):
         datapages.append({
                     "card_id" : counter,
                     "author": each.user,
+                    "author_first":each.user.first_name,
+                    "author_last": each.user.last_name,
                     "title": each.title,
                     "book_title": volumeInfo["title"],
                     "book_authors": str(volumeInfo["authors"]),
@@ -259,16 +269,6 @@ def library_view(request):
     
     
     
-    
-def trycatch(inobject,key,firstobject=False,iterator=None):
-    try:
-        if(firstobject):
-            return inobject[key][iterator]
-        else:
-            return inobject[key]
-    except:
-        return False
-        
 
     
 def about_us_view(request):
@@ -277,7 +277,8 @@ def about_us_view(request):
     return render(request, "about_us.html",{"page_name":"About Me","about":True})
     
 def contact_us_view(request):
-
+    
+    """ Contact us function loads a website or processes a form """
 
     if(request.user.is_anonymous):
         user_name = request.user
@@ -287,7 +288,7 @@ def contact_us_view(request):
         user_name = user.username
         user_email = user.email
     
-    """ Contact us function loads a website or processes a form """
+   
     if request.method == 'POST':
         #try:
         if(request.user.is_anonymous):
@@ -315,14 +316,24 @@ def contact_us_view(request):
 def settings_view(request):
     
     """ Users settings view"""
-    return render(request, "settings.html",{"page_name":"Settings","active":"settings"})
+    if request.method == 'POST':
+        user_form = UpdateUserForm(request.POST, instance=request.user)
+  
+        if user_form.is_valid():
+            user_form.save()
+            messages.success(request, 'Your profile is updated successfully')
+            return redirect('settings')
+    else:
+        user_form = UpdateUserForm(instance=request.user)
 
-
-### API INTERACTIONS 
+    return render(request, "settings.html",{
+        "page_name":"Settings",
+        "active":"settings",
+        'user_form': user_form
+    })
 
 
 ### LOGIN / LOGOUT / REGISTER SIDE OF THE APPLICATION
-    
     
 def login_view(request):
     if request.method == "POST":
@@ -374,6 +385,16 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "register.html")
+
+class ChangePasswordView(SuccessMessageMixin, PasswordChangeView):
+    template_name = 'change_password.html'
+    success_message = "Successfully Changed Your Password"
+    success_url = reverse_lazy('users-home')
+
+
+
+
+### API INTERACTIONS 
 
 @csrf_exempt
 def book_toogle(request):
@@ -448,3 +469,39 @@ def save_post(request):
             
             
     return JsonResponse({"message": message}, status=return_status)
+    
+## HELPER FUNCTIONS  
+    
+def trycatch(inobject,key,firstobject=False,iterator=None):
+    try:
+        if(firstobject):
+            return inobject[key][iterator]
+        else:
+            return inobject[key]
+    except:
+        return False
+        
+        
+        
+## FOORM CLASSES
+
+class UpdateUserForm(forms.ModelForm):
+    username = forms.CharField(max_length=100,
+                               required=True,
+                               widget=forms.TextInput(attrs={'class': 'form-control'}))
+    first_name = forms.CharField(max_length=100,
+                               required=True,
+                               widget=forms.TextInput(attrs={'class': 'form-control'}))
+                               
+    last_name = forms.CharField(max_length=100,
+                               required=True,
+                               widget=forms.TextInput(attrs={'class': 'form-control'}))
+                               
+    email = forms.EmailField(required=True,
+                             widget=forms.TextInput(attrs={'class': 'form-control'}))
+    
+    
+    
+    class Meta:
+        model = User
+        fields = ['username', 'first_name','last_name','email']
