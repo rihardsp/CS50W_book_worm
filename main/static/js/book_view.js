@@ -3,27 +3,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
   //document.querySelector('#btn - submit_blog_form').addEventListener('click', () => submit_blog);
   //document.querySelector('#btn-submit_blog_form').addEventListener('click', submit_blog);
-  var submit_blog_button = document.getElementById('btn_submit_blog_form')
-  var alertfield = document.getElementById('alert_field')
-  var textfield = document.getElementById('blog_text')
-  var titlefield = document.getElementById('blog_title')
+  var submitBlogButton = document.getElementById('btn_submit_blog_form');
+  var alertField = document.getElementById('alert_field');
+  var textField = document.getElementById('blog_text');
+  var titleField = document.getElementById('blog_title');
   document.addEventListener('input', function(e) {
-    if (alertfield.style.display == 'inline') {
+    if (alertField.style.display == 'inline') {
       if (e.target) {
         if (e.target.id == 'blog_title' || e.target.id == 'blog_text') {
-          alertfield.style.display = 'none'
+          alertField.style.display = 'none';
         }
       }
     }
-  })
+  });
 
 
-  submit_blog_button.addEventListener('click', function() {
+  submitBlogButton.addEventListener('click', function() {
 
-    let blog_title = titlefield.value
-    let blog_text = textfield.value
-    let book_key = submit_blog_button.name
-    console.log(blog_text, blog_title, book_key)
+    let blogTitle = titleField.value;
+    let blogText = textField.value;
+    let bookKey = submitBlogButton.name;
+    console.log(blogText, blogTitle, bookKey)
     /* alerts
     <divclass="alert alert-warning" role="alert">
       This is a warning alert—check it out!
@@ -31,81 +31,82 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
     */
 
-    if (blog_title == "" || blog_title == null) {
-      alertfield.style.display = 'inline';
-      alertfield.className = "alert alert-warning fade show"
-      alertfield.innerHTML = "Please enter blogs title!"
+    if (blogTitle == "" || blogTitle == null) {
+      alertField.style.display = 'inline';
+      alertField.className = "alert alert-warning fade show";
+      alertField.innerHTML = "Please enter blogs title!";
     }
-    else if (blog_text == "" || blog_text == null) {
-      alertfield.style.display = 'inline';
-      alertfield.className = "alert alert-warning fade show"
-      alertfield.innerHTML = "Please enter text!"
+    else if (blogText == "" || blogText == null) {
+      alertField.style.display = 'inline';
+      alertField.className = "alert alert-warning fade show";
+      alertField.innerHTML = "Please enter text!";
     }
-    else if (blog_text != "" && blog_text != null && blog_title != "" && blog_title != null) {
+    else if (blogText != "" && blogText != null && blogTitle != "" && blogTitle != null) {
       fetch('/save_post', {
         method: 'POST',
         body: JSON.stringify({
-          book_key: book_key,
-          blog_title: blog_title,
-          blog_text: blog_text
+          book_key: bookKey,
+          blog_title: blogTitle,
+          blog_text: blogText
         })
       }).then(response => {
 
         if (response.status = 201) {
-          textfield.disabled = true;
-          titlefield.disabled = true;
-          submit_blog_button.disabled = true;
-          alertfield.style.display = 'inline';
-          alertfield.className = "alert alert-success fade show"
-          alertfield.innerHTML = `Blog saved successfully!`
+          textField.disabled = true;
+          titleField.disabled = true;
+          submitBlogButton.disabled = true;
+          alertField.style.display = 'inline';
+          alertField.className = "alert alert-success fade show";
+          alertField.innerHTML = `Blog saved successfully!`;
         }
         else {
-          textfield.disabled = true;
-          titlefield.disabled = true;
-          submit_blog_button.disabled = true;
-          alertfield.style.display = 'inline';
-          alertfield.className = "alert alert-warning fade show"
-          alertfield.innerHTML = `Something went horribly wrong, please contact site administrator!`
+          textField.disabled = true;
+          titleField.disabled = true;
+          submitBlogButton.disabled = true;
+          alertField.style.display = 'inline';
+          alertField.className = "alert alert-warning fade show";
+          alertField.innerHTML = `Something went horribly wrong, please contact site administrator!`;
         }
-      })
+      });
 
     }
   });
 
-  var add_remove_button = document.getElementById("btn_library")
-  add_remove_button.addEventListener('click', function() {
+  var addRemoveButton = document.getElementById("btn_library");
+  addRemoveButton.addEventListener('click', function() {
 
-    let book_key = add_remove_button.value
-    let book_in_library = add_remove_button.name
+    let bookKey = addRemoveButton.value;
+    let bookInLibrary = addRemoveButton.name;
 
     fetch('/library-toggle', {
         method: 'POST',
         body: JSON.stringify({
-          book_key: book_key,
-          book_in_library: book_in_library
+          book_key: bookKey,
+          book_in_library: bookInLibrary
         })
       }).then(response => response.json())
       .then(data => {
 
         if (data["name"] == true) {
-          add_remove_button.innerHTML = "Remove from my library"
-          add_remove_button.name = "True"
+          addRemoveButton.innerHTML = "Remove from my library";
+          addRemoveButton.name = "True";
         }
         else if (data["name"] == false) {
-          add_remove_button.innerHTML = "Save to my library"
-          add_remove_button.name = "False"
+          addRemoveButton.innerHTML = "Save to my library";
+          addRemoveButton.name = "False";
         }
         else {
-          add_remove_button.innerHTML = "Please reload the page!"
-          add_remove_button.style = "colour: red"
+          addRemoveButton.innerHTML = "Please reload the page!";
+          addRemoveButton.style = "colour: red";
         }
       });
-  })
+  });
 
-})
+});
 
 
 function read_more() {
+  // Used directly from HTML 
   var dots = document.getElementById("dots");
   var moreText = document.getElementById("readmore");
   var btnText = document.getElementById("readmore-btn");

@@ -305,7 +305,7 @@ def library_view(request):
                 
         library_pages = paginator.page(page)
 
-    
+
     return render(request, "library.html",{
         "page_name":"Library",
         "library":True,

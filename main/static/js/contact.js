@@ -4,8 +4,17 @@
  * Author: BootstrapMade.com
  * I did some changes though
  */
+
+
 (function() {
+
+  /**
+   * Function that gets data from email-form (contact form) and sends it to the server. It than monitors for response and shows a success/error message. I have included this for educational purposes
+   */
+
+
   "use strict";
+
 
   let forms = document.querySelectorAll('.php-email-form');
 
@@ -19,7 +28,7 @@
       let recaptcha = thisForm.getAttribute('data-recaptcha-site-key');
 
       if (!action) {
-        displayError(thisForm, 'The form action property is not set!')
+        displayError(thisForm, 'The form action property is not set!');
         return;
       }
       thisForm.querySelector('.loading').classList.add('d-block');
@@ -36,15 +45,15 @@
                 .then(token => {
                   formData.set('recaptcha-response', token);
                   php_email_form_submit(thisForm, action, formData);
-                })
+                });
             }
             catch (error) {
-              displayError(thisForm, error)
+              displayError(thisForm, error);
             }
           });
         }
         else {
-          displayError(thisForm, 'The reCaptcha javascript API url is not loaded!')
+          displayError(thisForm, 'The reCaptcha javascript API url is not loaded!');
         }
       }
       else {
@@ -60,13 +69,13 @@
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
       })
       .then(response => {
-        console.log(response)
-        console.log(response.ok)
+        console.log(response);
+        console.log(response.ok);
         if (response.ok) {
-          return response.text()
+          return response.text();
         }
         else {
-          console.log(" exception it goes here")
+          console.log(" exception it goes here");
           throw new Error(`${response.status} ${response.statusText} ${response.url}`);
         }
       })
@@ -74,7 +83,7 @@
 
         thisForm.querySelector('.loading').classList.remove('d-block');
 
-        console.log(data.trim())
+        console.log(data.trim());
         if (data.trim() == 'OK') {
 
           thisForm.querySelector('.sent-message').classList.add('d-block');
