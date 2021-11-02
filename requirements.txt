@@ -1,5 +1,5 @@
 astroid==2.3.0
-attrs==21.2.0
+attrs==20.3.0
 autopep8==1.5.7
 aws-cdk.assets==1.124.0
 aws-cdk.aws-applicationautoscaling==1.124.0
@@ -58,10 +58,12 @@ importlib-metadata==4.8.1
 ipython==7.27.0
 isort==4.3.21
 jedi==0.18.0
+jellyfish==0.8.8
 jmespath==0.10.0
 jsii==1.35.0
 jsonschema==3.2.0
 lazy-object-proxy==1.6.0
+lib50==3.0.3
 lockfile==0.11.0
 matplotlib-inline==0.1.3
 mccabe==0.6.1
@@ -97,6 +99,7 @@ semantic-version==2.5.0
 simplejson==3.2.0
 six==1.11.0
 stevedore==3.4.0
+submit50==3.1.0
 termcolor==1.1.0
 texttable==1.6.4
 toml==0.10.2
