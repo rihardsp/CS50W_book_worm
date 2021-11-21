@@ -140,8 +140,8 @@ USE_TZ = True
 #STATIC_ROOT = "bookworm.us-east-2.elasticbeanstalk.com/static/"
 
 # AWS S3 Static Files Configuration
-AWS_ACCESS_KEY_ID = "AKIA5D7QIJY5IGYZVGU3"
-AWS_SECRET_ACCESS_KEY = "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"
+AWS_ACCESS_KEY_ID = "***"
+AWS_SECRET_ACCESS_KEY = "***"
 AWS_STORAGE_BUCKET_NAME = "bookworm-static"
 AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
 AWS_S3_OBJECT_PARAMETERS = {
