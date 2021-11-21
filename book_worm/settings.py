@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 
 import os
 
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -25,7 +26,7 @@ SECRET_KEY = 'a#ty#vo*v&=b2)=j%wguo7osld@^7__0dt&40ir3tm(y2m-@bg'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['django-env.eba-nat8ed3y.us-west-2.elasticbeanstalk.com','4ba436c1d58d4823a40c00524f6daae3.vfs.cloud9.us-east-2.amazonaws.com']
+ALLOWED_HOSTS = ['http://bookworm.us-east-2.elasticbeanstalk.com/','4ba436c1d58d4823a40c00524f6daae3.vfs.cloud9.us-east-2.amazonaws.com']
 
 # Application definition
 
@@ -37,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'storages'
 ]
 
 MIDDLEWARE = [
@@ -72,13 +74,27 @@ WSGI_APPLICATION = 'book_worm.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
-
-DATABASES = {
+if 'RDS_DB_NAME' in os.environ:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ['RDS_DB_NAME'],
+            'USER': os.environ['RDS_USERNAME'],
+            'PASSWORD': os.environ['RDS_PASSWORD'],
+            'HOST': os.environ['RDS_HOSTNAME'],
+            'PORT': os.environ['RDS_PORT'],
+        }
+    }
+else:
+    DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
+
+
 
 AUTH_USER_MODEL = "main.User"
 # Password validation
@@ -117,4 +133,26 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
-STATIC_URL = '/static/'
+#STATIC_URL = '/static/'
+
+
+
+#STATIC_ROOT = "bookworm.us-east-2.elasticbeanstalk.com/static/"
+
+# AWS S3 Static Files Configuration
+AWS_ACCESS_KEY_ID = "AKIA5D7QIJY5IGYZVGU3"
+AWS_SECRET_ACCESS_KEY = "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"
+AWS_STORAGE_BUCKET_NAME = "bookworm-static"
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = 'public-read'
+AWS_LOCATION = 'static'
+
+STATICFILES_DIRS = [
+    'main/static',
+]
+STATIC_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, AWS_LOCATION)
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'

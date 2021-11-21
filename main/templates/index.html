@@ -35,18 +35,16 @@
                   <span><strong>{{ result.author }}</strong> wrote about <strong>{{ result.book_title }}</strong><small style="float:right" class="text-muted">{{ result.timestamp }} </small></span>
                 </div>
                 <div class="card-body">
-                  <div class="row">
-                    <div class="col-10">
                       <h5 class="card-title">{{ result.title }}</h5>
                       <p class="card-text">{{ result.short_text }}...</p>
                       <br>
-                      <button type="button" class="btn btn-primary" style="width:20%; background: #1e4356; color: #fff;" data-bs-toggle="modal" data-bs-target="#Modal_{{ result.card_id }}">
-                Read Blog
-              </button>
-                    </div>
-                    <div class="col-2" style="float:right">
+                    <div style="float:right">
                       <a href="book/{{ result.book_key }}/{{ result.book_id }}"><img src="{{ result.book_cover }}"></a>
                     </div>
+                    <button type="button" class="btn btn-primary" style="width:20%; text-align: center; min-width: 140px; background: #1e4356; color: #fff;" data-bs-toggle="modal" data-bs-target="#Modal_{{ result.card_id }}">
+                        Read Blog
+                    </button>
+             
                   </div>
                 </div>
               </div>
@@ -70,7 +68,7 @@
                   </div>
                 </div>
               </div>
-            </div>
+         
             {% endfor %}
           </div>
         </div>
@@ -122,8 +120,8 @@
       <div class="col-xl-8">
         <h2>Welcome to Book Worm</h2>
         <p>Please login to your account</p>
-        <a href="{% url 'login' %}" class="btn-get-started " style="width:20%; background: #1e4356; color: #fff;">Login</a>
-        <a href="{% url 'register' %}" class="btn-get-started " style="width:20%; background: #1e4356; color: #fff;">Register</a>
+        <a href="{% url 'login' %}" class="btn-get-started " style="width:20%; min-width:120px; background: #1e4356; color: #fff;">Login</a>
+        <a href="{% url 'register' %}" class="btn-get-started " style="width:20%; text-align: center; min-width: 120px; background: #1e4356; color: #fff;">Register</a>
       </div>
     </div>
   </div>

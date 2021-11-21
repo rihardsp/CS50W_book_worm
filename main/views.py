@@ -47,31 +47,52 @@ def index(request):
     datapages = []
 
     counter= 0
-    for each in all_blogs:
-        book_key = each.book_id
-        short_text = each.text[:200]
-        long_text = each.text
+    try:    
+        for each in all_blogs:
+            try:
+                book_key = each.book_id
+                short_text = each.text[:200]
+                long_text = each.text
+                API_response = requests.get("https://www.googleapis.com/books/v1/volumes/"+book_key)
+                API_results = API_response.json()
+                volumeInfo = API_results['volumeInfo']
         
-        API_response = requests.get("https://www.googleapis.com/books/v1/volumes/"+book_key)
-        API_results = API_response.json()
-        volumeInfo = API_results['volumeInfo']
-
+                datapages.append({
+                            "card_id" : counter,
+                            "author": each.user,
+                            "author_first":each.user.first_name,
+                            "author_last": each.user.last_name,
+                            "title": each.title,
+                            "book_title": volumeInfo["title"],
+                            "book_authors": str(volumeInfo["authors"]),
+                            "short_text": short_text,
+                            "long_text": long_text,
+                            "book_key": book_key,
+                            "book_id": trycatch(trycatch(volumeInfo,"industryIdentifiers",iterator_needed=True,iterator=1),"identifier"),
+                            "book_cover": trycatch(trycatch(volumeInfo,"imageLinks"),"smallThumbnail"),
+                            "timestamp":each.timestamp
+                            })
+                counter += 1
+            except:
+                print("datapagecreation failed")
+    except:
         datapages.append({
-                    "card_id" : counter,
-                    "author": each.user,
-                    "author_first":each.user.first_name,
-                    "author_last": each.user.last_name,
-                    "title": each.title,
-                    "book_title": volumeInfo["title"],
-                    "book_authors": str(volumeInfo["authors"]),
-                    "short_text": short_text,
-                    "long_text": long_text,
-                    "book_key": book_key,
-                    "book_id": trycatch(trycatch(volumeInfo,"industryIdentifiers",iterator_needed=True,iterator=1),"identifier"),
-                    "book_cover": trycatch(trycatch(volumeInfo,"imageLinks"),"smallThumbnail"),
-                    "timestamp":each.timestamp
+                    "card_id" : "",
+                    "author": "",
+                    "author_first":"",
+                    "author_last": "",
+                    "title": "",
+                    "book_title": "",
+                    "book_authors": "",
+                    "short_text": "",
+                    "long_text": "",
+                    "book_key": "",
+                    "book_id": "",
+                    "book_cover": "",
+                    "timestamp":""
                     })
-        counter += 1
+        
+        
     paginator = Paginator(datapages,MAXPAGERESULTS)
             
     blog_pages = paginator.page(page)
